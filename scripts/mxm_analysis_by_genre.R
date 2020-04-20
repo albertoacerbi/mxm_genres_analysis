@@ -5,7 +5,7 @@ library(viridis)
 
 
 # load data:
-mxm_data <- read_csv("../../data/mxm.csv")
+mxm_data <- read_csv("../data/mxm.csv")
 # in the mxm datataset we keep only years for which we have more than 500 songs
 count_by_year <- mxm_data %>%
   count(year) %>%
@@ -34,15 +34,15 @@ ggplot(data = genres, aes(x = genre, y = n)) +
   coord_flip() +
   theme_minimal() +
   labs(title = "Most common 20 genres in the mxm dataset", y = "number of songs") +
-  ggsave("../plots/genres.pdf", width = 6, height = 6) 
+  ggsave("plots/genres.pdf", width = 6, height = 6) 
 
 # TO DO:
 # relative prevalence of each genre:
-# https://www.r-graph-gallery.com/136-stacked-area-chart.html
+# see https://www.r-graph-gallery.com/136-stacked-area-chart.html
 
 # absolute values:
 genres_relative <- mxm_data %>%
-  filter(genre %in% genres$genre[11:20]) %>%
+  filter(genre %in% genres$genre[11:20]) %>% # only first ten genres
   group_by(genre, year) %>% 
   tally() 
 
@@ -57,7 +57,7 @@ ggplot(data = genres_relative, aes(x = year, y = percentage, fill=genre)) +
   geom_area(size=.3, colour="white") +
   theme_minimal() +
   scale_fill_viridis(discrete = TRUE) +
-  labs(y = "proportion in the dataset", title = "Relative prevalence of 10 most common genres")
+  labs(y = "proportion in the dataset", title = "Time prevalence of 10 most common genres")
 # need to adjust the plot and order by final proportion  
   
 # #############################################################################
@@ -96,7 +96,7 @@ p2 <- ggplot(data = emo_trends_mxm, aes(year, (negative)/n) )+
   labs(y="proportion", title = "Negative emotions (all genres)")  +
   theme_minimal()
 
-pdf("../plots/mxm_all.pdf", width = 10, height = 5)
+pdf("plots/mxm_all.pdf", width = 10, height = 5)
 grid.arrange(p1, p2, nrow = 1) 
 dev.off() 
 
@@ -136,7 +136,7 @@ for(i in genres$genre){
     labs(y="proportion", title = paste("Negative emotions (",i,")", sep = ""))  +
     theme_minimal()
   
-  pdf(paste("../plots/mxm_", outfiles[counter], ".pdf", sep =""), width = 10, height = 5)
+  pdf(paste("plots/mxm_", outfiles[counter], ".pdf", sep =""), width = 10, height = 5)
   grid.arrange(p1, p2, nrow = 1) 
   dev.off() 
   
@@ -158,11 +158,12 @@ p2 <- ggplot(data = av_emo, aes(x = reorder(genre, negative), y = negative)) +
   theme_minimal() +
   labs(title = "Genres ordered by overall negativity", y = "proportion", x = "genre")
 
-pdf("../plots/overall_emo_genres.pdf", width = 10, height = 5)
+pdf("plots/overall_emo_genres.pdf", width = 10, height = 5)
 grid.arrange(p1, p2, nrow = 1) 
 dev.off() 
 
 
-
-# is it possible to calculate the relative contribution of each genre to the general trend?
+# TO DO:
+# calculate the relative contribution of each genre to the general trend?
+# perhaps check Olivier's portraits paper.
 
