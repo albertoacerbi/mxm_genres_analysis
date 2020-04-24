@@ -38,11 +38,12 @@ ggplot(data = genres, aes(x = genre, y = n)) +
 
 # TO DO:
 # relative prevalence of each genre:
-# see https://www.r-graph-gallery.com/136-stacked-area-chart.html
+
+# first we find the 10 genres more abundant in the last year of the data:
 
 # absolute values:
-genres_relative <- mxm_data %>%
-  filter(genre %in% genres$genre[11:20]) %>% # only first ten genres
+genres_relative <- mxm_data %>% 
+  filter(genre != "NA") %>%
   group_by(genre, year) %>% 
   tally() 
 
@@ -53,13 +54,20 @@ genres_relative <- genres_relative  %>%
   mutate(percentage = n / sum(n))
 
 # plot:
-ggplot(data = genres_relative, aes(x = year, y = percentage, fill=genre)) + 
-  geom_area(size=.3, colour="white") +
-  theme_minimal() +
-  scale_fill_viridis(discrete = TRUE) +
-  labs(y = "proportion in the dataset", title = "Time prevalence of 10 most common genres")
-# need to adjust the plot and order by final proportion  
-  
+
+genres_relative %>%
+  filter(genre %in% genres$genre) %>%
+  ungroup() %>%
+  complete(year, genre) %>%
+  replace_na(list(percentage = 0)) %>%
+  mutate(genre = factor(genre, levels = genres$genre)) %>%
+  ggplot(aes(x = year, y = percentage, fill=genre)) + 
+    geom_area(size=.3, colour="black") +
+    theme_minimal() +
+    scale_fill_viridis(discrete = TRUE) +
+    labs(y = "proportion in the dataset", title = "Time prevalence of 20 most common genres") +
+    ggsave("plots/genres_year.pdf", width = 10, height = 6) 
+
 # #############################################################################
 # prepare for sentiment analaysis: 
 
@@ -67,8 +75,8 @@ mxm_data <- mxm_data %>%
   unnest_tokens(word,lyrics)
 
 # load, merge, and tidy LIWC lists of negative/positive emotion words:  
-LIWC_negemo <- read_csv("../LIWC/negemo.csv") # see also negemo_no_swear.csv
-LIWC_posemo <- read_csv("../LIWC/posemo.csv")
+LIWC_negemo <- read_csv("LIWC/negemo.csv") # see also negemo_no_swear.csv
+LIWC_posemo <- read_csv("LIWC/posemo.csv")
 LIWC <- tibble(word = c(LIWC_negemo$Negative, LIWC_posemo$Positive ),
                    sentiment = c(rep("negative", dim(LIWC_negemo)[1]), 
                                  rep("positive", dim(LIWC_posemo)[1])))
